@@ -33,7 +33,7 @@ export default function Navbar() {
     <nav className="glass-nav">
       <div className="container nav-content">
         <Link href="/" className="logo">
-          STREAM.
+          AkaalFLIX
         </Link>
         <div className="flex-center">
           {profile?.role === 'admin' && (

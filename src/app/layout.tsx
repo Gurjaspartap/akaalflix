@@ -8,7 +8,7 @@ import { AuthProvider } from "@/context/AuthContext";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Stream. | Your Movies",
+  title: "AkaalFLIX | Your Movies",
   description: "A premium streaming platform",
 };
 
