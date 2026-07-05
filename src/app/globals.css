@@ -249,3 +249,9 @@ button {
 .vjs-theme-stream .vjs-volume-level {
   background-color: var(--accent) !important;
 }
+
+/* Remove default focus outline on player */
+.video-js:focus,
+.video-js *:focus {
+  outline: none !important;
+}
