@@ -17,6 +17,16 @@ export default async function WatchPage({ params }: { params: Promise<{ id: stri
     controls: true,
     responsive: true,
     fluid: true,
+    playbackRates: [0.5, 1, 1.25, 1.5, 2], // Speed controls
+    controlBar: {
+      skipButtons: {
+        forward: 10,
+        backward: 10
+      }
+    },
+    userActions: {
+      hotkeys: true // Enables space to pause, F to fullscreen, arrows to skip
+    },
     sources: [{
       src: movie.videoUrl,
       type: 'video/mp4'
