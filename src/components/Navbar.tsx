@@ -1,13 +1,16 @@
 "use client";
 
 import { useTheme } from "next-themes";
-import { Moon, Sun, Monitor } from "lucide-react";
+import { Moon, Sun, Monitor, LogOut, User as UserIcon } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { useAuth } from "@/context/AuthContext";
+import { auth } from "@/lib/firebase";
 
 export default function Navbar() {
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
+  const { user, profile } = useAuth();
 
   useEffect(() => {
     setMounted(true);
@@ -30,9 +33,23 @@ export default function Navbar() {
     <nav className="glass-nav">
       <div className="container nav-content">
         <Link href="/" className="logo">
-          AkaalFLIX 
+          STREAM.
         </Link>
         <div className="flex-center">
+          {profile?.role === 'admin' && (
+            <Link href="/admin" className="btn btn-secondary" style={{ padding: '0.4rem 1rem' }}>Admin</Link>
+          )}
+          
+          {user ? (
+            <button onClick={() => auth.signOut()} className="btn btn-secondary" style={{ padding: '0.4rem 1rem' }}>
+              <LogOut size={16} /> Logout
+            </button>
+          ) : (
+            <Link href="/login" className="btn btn-primary" style={{ padding: '0.4rem 1rem' }}>
+              <UserIcon size={16} /> Sign In
+            </Link>
+          )}
+
           <button onClick={toggleTheme} className="theme-toggle" aria-label="Toggle theme">
             {getThemeIcon()}
           </button>

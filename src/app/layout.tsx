@@ -3,11 +3,12 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import Navbar from "@/components/Navbar";
+import { AuthProvider } from "@/context/AuthContext";
 
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "AkaalFLIX  | Your Movies",
+  title: "Stream. | Your Movies",
   description: "A premium streaming platform",
 };
 
@@ -20,10 +21,12 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body className={inter.className}>
         <ThemeProvider attribute="data-theme" defaultTheme="dark" enableSystem>
-          <Navbar />
-          <main style={{ paddingTop: '70px', minHeight: '100vh' }}>
-            {children}
-          </main>
+          <AuthProvider>
+            <Navbar />
+            <main style={{ paddingTop: '70px', minHeight: '100vh' }}>
+              {children}
+            </main>
+          </AuthProvider>
         </ThemeProvider>
       </body>
     </html>
