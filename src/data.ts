@@ -4,7 +4,7 @@ export const movies = [
     title: "Satluj (2026)",
     description: "Satluj 1080p ZEE5 WEB-DL Hindi.",
     thumbnail: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcREgI7P4sAR7tmpGTnERC5VdgVzoYEshkAXeRKTm8Xznw&s=10", // Placeholder scenic image
-    videoUrl: "http://34.40.227.223/movies/Satluj.2026.1080p.ZEE5.WEB-DL.Hindi.DDP5.1.H.264.mkv"
+    videoUrl: "https://storage.googleapis.com/akaalflix1/Satluj.2026.1080p.ZEE5.WEB-DL.Hindi.DDP5.1.H.264.mkv"
   },
   {
     id: "2",
