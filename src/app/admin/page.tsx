@@ -17,6 +17,8 @@ export default function AdminDashboard() {
     totalWatchEvents: 0,
     recentEvents: [] as any[]
   });
+  
+  const [filterEmail, setFilterEmail] = useState("");
 
   useEffect(() => {
     if (!loading && (!user || profile?.role !== 'admin')) {
@@ -32,15 +34,19 @@ export default function AdminDashboard() {
 
   const fetchAnalytics = async () => {
     try {
-      // Fetch Users
+      // Fetch Users and create a map for emails
       const usersSnap = await getDocs(collection(db, "users"));
       let activeSubs = 0;
+      const userMap: Record<string, string> = {};
+      
       usersSnap.forEach(doc => {
-        if (doc.data().subscription_status === 'active') activeSubs++;
+        const data = doc.data();
+        if (data.subscription_status === 'active') activeSubs++;
+        userMap[doc.id] = data.email || "Unknown Email";
       });
 
       // Fetch Watch Events
-      const q = query(collection(db, "watch_events"), orderBy("timestamp", "desc"), limit(10));
+      const q = query(collection(db, "watch_events"), orderBy("timestamp", "desc"), limit(50));
       const eventsSnap = await getDocs(q);
       const recent = [] as any[];
       eventsSnap.forEach(doc => {
@@ -50,6 +56,7 @@ export default function AdminDashboard() {
           id: doc.id,
           ...data,
           movieTitle: movie ? movie.title : "Unknown Movie",
+          userEmail: userMap[data.userId] || data.userId, // Fallback to ID if email not found
           date: data.timestamp?.toDate().toLocaleString()
         });
       });
@@ -64,6 +71,21 @@ export default function AdminDashboard() {
       console.error("Error fetching analytics", e);
     }
   };
+
+  const formatWatchTime = (seconds: number) => {
+    if (!seconds) return "0s";
+    const h = Math.floor(seconds / 3600);
+    const m = Math.floor((seconds % 3600) / 60);
+    const s = Math.floor(seconds % 60);
+    
+    if (h > 0) return `${h}h ${m}m ${s}s`;
+    if (m > 0) return `${m}m ${s}s`;
+    return `${s}s`;
+  };
+
+  const filteredEvents = stats.recentEvents.filter(event => 
+    event.userEmail.toLowerCase().includes(filterEmail.toLowerCase())
+  );
 
   if (loading || profile?.role !== 'admin') {
     return <div style={{ color: 'white', textAlign: 'center', marginTop: '100px' }}>Checking Permissions...</div>;
@@ -83,34 +105,44 @@ export default function AdminDashboard() {
           <p style={{ fontSize: '3rem', fontWeight: 'bold' }}>{stats.activeSubscribers}</p>
         </div>
         <div style={{ background: 'var(--card-bg)', padding: '2rem', borderRadius: '8px', borderLeft: '4px solid #8b5cf6' }}>
-          <h3 style={{ color: 'var(--text-secondary)' }}>Recent Watch Events</h3>
-          <p style={{ fontSize: '3rem', fontWeight: 'bold' }}>{stats.recentEvents.length}</p>
+          <h3 style={{ color: 'var(--text-secondary)' }}>Total Watch Events</h3>
+          <p style={{ fontSize: '3rem', fontWeight: 'bold' }}>{stats.totalWatchEvents}</p>
         </div>
       </div>
 
-      <h2 style={{ fontSize: '1.5rem', marginBottom: '1rem' }}>Recent Watch Activity (Last 10)</h2>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+        <h2 style={{ fontSize: '1.5rem' }}>Watch Activity (Last 50)</h2>
+        <input 
+          type="text" 
+          placeholder="Filter by Email..." 
+          value={filterEmail}
+          onChange={(e) => setFilterEmail(e.target.value)}
+          style={{ padding: '0.5rem 1rem', borderRadius: '4px', border: '1px solid var(--border-color)', background: 'var(--bg-primary)', color: 'white', width: '250px' }}
+        />
+      </div>
+
       <div style={{ background: 'var(--card-bg)', borderRadius: '8px', overflow: 'hidden' }}>
         <table style={{ width: '100%', textAlign: 'left', borderCollapse: 'collapse' }}>
           <thead>
             <tr style={{ background: 'rgba(255,255,255,0.05)' }}>
               <th style={{ padding: '1rem' }}>Movie</th>
-              <th style={{ padding: '1rem' }}>User ID</th>
-              <th style={{ padding: '1rem' }}>Seconds Watched</th>
-              <th style={{ padding: '1rem' }}>Time</th>
+              <th style={{ padding: '1rem' }}>User Email</th>
+              <th style={{ padding: '1rem' }}>Watch Time</th>
+              <th style={{ padding: '1rem' }}>Date</th>
             </tr>
           </thead>
           <tbody>
-            {stats.recentEvents.map(event => (
+            {filteredEvents.map(event => (
               <tr key={event.id} style={{ borderTop: '1px solid var(--border-color)' }}>
                 <td style={{ padding: '1rem', fontWeight: 'bold' }}>{event.movieTitle}</td>
-                <td style={{ padding: '1rem', color: 'var(--text-secondary)' }}>{event.userId}</td>
-                <td style={{ padding: '1rem' }}>{Math.round(event.secondsWatched)}s</td>
+                <td style={{ padding: '1rem', color: 'var(--text-secondary)' }}>{event.userEmail}</td>
+                <td style={{ padding: '1rem' }}>{formatWatchTime(event.secondsWatched)}</td>
                 <td style={{ padding: '1rem', color: 'var(--text-secondary)' }}>{event.date}</td>
               </tr>
             ))}
-            {stats.recentEvents.length === 0 && (
+            {filteredEvents.length === 0 && (
               <tr>
-                <td colSpan={4} style={{ padding: '2rem', textAlign: 'center' }}>No watch events recorded yet.</td>
+                <td colSpan={4} style={{ padding: '2rem', textAlign: 'center' }}>No watch events match your filter.</td>
               </tr>
             )}
           </tbody>
